@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>法要通知登録</title>
+  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+</head>
+
+<body>
+  <h2>法要通知登録</h2>
+
+  <p id="message">LINE情報を確認中です...</p>
+  <p id="debug" style="font-size:12px;color:#666;"></p>
+
+  <label>告別式日</label><br>
+  <input type="date" id="funeralDate"><br><br>
+
+  <label>
+    <input type="checkbox" id="status" checked>
+    法要日リマインドを受け取る
+  </label><br><br>
+
+  <button id="submitButton" onclick="submitForm()" disabled>
+    LINE確認中...
+  </button>
+
+  <script>
+    const LIFF_ID = '2010185051-qe1y1hdl';
+    const GAS_URL = 'https://script.google.com/macros/s/AKfycbzzK1Om6RT7GZwF8PoMPADpclmivPVlxD50HBPp9Euw3LuuiQbTtUsU94L_UEkKTV1o/exec';
+
+    let lineUserId = '';
+    let lineDisplayName = '';
+
+    const message = document.getElementById('message');
+    const debug = document.getElementById('debug');
+    const button = document.getElementById('submitButton');
+
+    async function initializeLiff() {
+      try {
+        message.innerText = 'LIFF初期化中...';
+
+        await liff.init({ liffId: LIFF_ID });
+
+        debug.innerText =
+          '初期化成功 / LINE内=' + liff.isInClient() +
+          ' / ログイン=' + liff.isLoggedIn();
+
+        if (!liff.isLoggedIn()) {
+          message.innerText = 'LINEログインへ移動します...';
+          liff.login();
+          return;
+        }
+
+        const profile = await liff.getProfile();
+
+        lineUserId = profile.userId;
+        lineDisplayName = profile.displayName || '';
+
+        message.innerText = '登録できます。';
+
+        button.disabled = false;
+        button.innerText = '登録する';
+
+      } catch (error) {
+        message.innerText = 'エラー：' + error.message;
+      }
+    }
+
+    async function submitForm() {
+      const funeralDate = document.getElementById('funeralDate').value;
+      const receiveReminder = document.getElementById('status').checked;
+
+      if (!funeralDate) {
+        message.innerText = '告別式日を入力してください。';
+        return;
+      }
+
+      if (!lineUserId) {
+        message.innerText = 'LINEユーザーIDが取得できていません。';
+        return;
+      }
+
+      message.innerText = '登録中...';
+
+      const payload = {
+        userId: lineUserId,
+        displayName: lineDisplayName,
+        funeralDate: funeralDate,
+        status: receiveReminder ? '配信希望' : '配信停止'
+      };
+
+      try {
+        const response = await fetch(GAS_URL, {
+          method: 'POST',
+          body: JSON.stringify(payload),
+          headers: {
+            'Content-Type': 'text/plain;charset=utf-8'
+          }
+        });
+
+        const result = await response.json();
+
+        message.innerText =
+          result.status === 'success'
+            ? '登録が完了しました。'
+            : '登録エラー：' + result.message;
+
+      } catch (error) {
+        message.innerText = '送信エラー：' + error.message;
+      }
+    }
+
+    initializeLiff();
+  </script>
+</body>
+</html>
