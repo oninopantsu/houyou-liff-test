@@ -1,49 +1,191 @@
 <!DOCTYPE html>
-<html>
+<html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>法要通知登録</title>
+  <title>法要日チェック・リマインド登録</title>
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: "Hiragino Kaku Gothic ProN", "Yu Gothic", "Meiryo", sans-serif;
+      background: #f5f7f6;
+      color: #333;
+      font-size: 17px;
+      line-height: 1.8;
+    }
+
+    .container {
+      max-width: 520px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 16px;
+      padding: 24px 20px;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+    }
+
+    .label {
+      display: inline-block;
+      background: #0b6b50;
+      color: #fff;
+      padding: 4px 12px;
+      border-radius: 999px;
+      font-size: 14px;
+      margin-bottom: 12px;
+    }
+
+    h1 {
+      font-size: 24px;
+      color: #143f67;
+      line-height: 1.5;
+      margin: 0 0 12px;
+    }
+
+    .lead {
+      font-size: 16px;
+      color: #555;
+      margin-bottom: 22px;
+    }
+
+    label {
+      display: block;
+      font-weight: bold;
+      margin-top: 18px;
+      margin-bottom: 6px;
+      color: #333;
+    }
+
+    input[type="date"] {
+      width: 100%;
+      padding: 14px;
+      font-size: 18px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      box-sizing: border-box;
+      background: #fff;
+    }
+
+    .check {
+      margin-top: 18px;
+      padding: 14px;
+      background: #f1f6f4;
+      border-radius: 10px;
+    }
+
+    .check input {
+      transform: scale(1.2);
+      margin-right: 8px;
+    }
+
+    button {
+      width: 100%;
+      margin-top: 24px;
+      padding: 16px;
+      font-size: 18px;
+      font-weight: bold;
+      color: #fff;
+      background: #0b6b50;
+      border: none;
+      border-radius: 10px;
+    }
+
+    button:disabled {
+      background: #aaa;
+    }
+
+    #message {
+      margin-top: 16px;
+      font-weight: bold;
+      color: #143f67;
+    }
+
+    .schedule {
+      margin-top: 22px;
+      border-top: 1px solid #ddd;
+      padding-top: 16px;
+    }
+
+    .schedule h2 {
+      font-size: 19px;
+      color: #143f67;
+      margin-bottom: 10px;
+    }
+
+    .schedule-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px solid #eee;
+      font-size: 16px;
+    }
+
+    .note {
+      font-size: 14px;
+      color: #666;
+      margin-top: 16px;
+    }
+  </style>
 </head>
 
 <body>
-  <h2>法要通知登録</h2>
+  <div class="container">
+    <div class="card">
+      <span class="label">法要日チェック</span>
 
-  <p id="message">LINE情報を確認中です...</p>
-  <p id="debug" style="font-size:12px;color:#666;"></p>
+      <h1>法要日を確認し、<br>事前にLINEでお知らせします</h1>
 
-  <label>告別式日</label><br>
-  <input type="date" id="funeralDate"><br><br>
+      <p class="lead">
+        告別式日を入力すると、四十九日から十三回忌までの目安日を確認できます。
+        ご希望の方には、法要日の約1か月前を目安にLINEでお知らせします。
+      </p>
 
-  <label>
-    <input type="checkbox" id="status" checked>
-    法要日リマインドを受け取る
-  </label><br><br>
+      <p id="message">LINE情報を確認中です...</p>
 
-  <button id="submitButton" onclick="submitForm()" disabled>
-    LINE確認中...
-  </button>
+      <label for="funeralDate">告別式日</label>
+      <input type="date" id="funeralDate" onchange="showSchedule()">
+
+      <div class="check">
+        <label>
+          <input type="checkbox" id="status" checked>
+          法要日リマインドを受け取る
+        </label>
+      </div>
+
+      <div class="schedule" id="scheduleArea" style="display:none;">
+        <h2>法要日の目安</h2>
+        <div id="scheduleList"></div>
+        <p class="note">
+          ※地域やご事情により、実際の日程は前後する場合があります。目安としてご確認ください。
+        </p>
+      </div>
+
+      <button id="submitButton" onclick="submitForm()" disabled>
+        LINE確認中...
+      </button>
+
+      <p class="note">
+        登録後も、通知を希望しない場合はチェックを外して再登録することで停止扱いにできます。
+      </p>
+    </div>
+  </div>
 
   <script>
-    const LIFF_ID = '2010185051-qe1y1hdl';
-    const GAS_URL = 'https://script.google.com/macros/s/AKfycbzzK1Om6RT7GZwF8PoMPADpclmivPVlxD50HBPp9Euw3LuuiQbTtUsU94L_UEkKTV1o/exec';
+    const LIFF_ID = 'ここにLIFF ID';
+    const GAS_URL = 'ここにGASのウェブアプリURL';
 
     let lineUserId = '';
     let lineDisplayName = '';
 
     const message = document.getElementById('message');
-    const debug = document.getElementById('debug');
     const button = document.getElementById('submitButton');
 
     async function initializeLiff() {
       try {
-        message.innerText = 'LIFF初期化中...';
-
         await liff.init({ liffId: LIFF_ID });
-
-        debug.innerText =
-          '初期化成功 / LINE内=' + liff.isInClient() +
-          ' / ログイン=' + liff.isLoggedIn();
 
         if (!liff.isLoggedIn()) {
           message.innerText = 'LINEログインへ移動します...';
@@ -57,13 +199,59 @@
         lineDisplayName = profile.displayName || '';
 
         message.innerText = '登録できます。';
-
         button.disabled = false;
-        button.innerText = '登録する';
+        button.innerText = 'この内容で登録する';
 
       } catch (error) {
-        message.innerText = 'エラー：' + error.message;
+        message.innerText = 'LINE情報を取得できませんでした。LIFF URLから開き直してください。';
       }
+    }
+
+    function addDays(date, days) {
+      const d = new Date(date);
+      d.setDate(d.getDate() + days);
+      return d;
+    }
+
+    function addYears(date, years) {
+      const d = new Date(date);
+      d.setFullYear(d.getFullYear() + years);
+      return d;
+    }
+
+    function formatDate(date) {
+      return date.getFullYear() + '年' +
+        (date.getMonth() + 1) + '月' +
+        date.getDate() + '日';
+    }
+
+    function showSchedule() {
+      const value = document.getElementById('funeralDate').value;
+      if (!value) return;
+
+      const base = new Date(value);
+
+      const items = [
+        ['四十九日', addDays(base, 49)],
+        ['一周忌', addYears(base, 1)],
+        ['三回忌', addYears(base, 2)],
+        ['七回忌', addYears(base, 6)],
+        ['十三回忌', addYears(base, 12)]
+      ];
+
+      const list = document.getElementById('scheduleList');
+      list.innerHTML = '';
+
+      items.forEach(item => {
+        list.innerHTML += `
+          <div class="schedule-item">
+            <span>${item[0]}</span>
+            <strong>${formatDate(item[1])}</strong>
+          </div>
+        `;
+      });
+
+      document.getElementById('scheduleArea').style.display = 'block';
     }
 
     async function submitForm() {
@@ -80,7 +268,7 @@
         return;
       }
 
-      message.innerText = '登録中...';
+      message.innerText = '登録中です...';
 
       const payload = {
         userId: lineUserId,
