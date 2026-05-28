@@ -303,7 +303,7 @@
       <p id="message">LINE情報を確認中です...</p>
 
       <label class="title" for="funeralDate">
-        告別式日 <span class="required">必須</span>
+        没日 <span class="required">必須</span>
       </label>
       <input type="date" id="funeralDate" onchange="showSchedule()">
 
@@ -439,12 +439,12 @@
 
       message.innerText = '登録中です...';
 
-      const payload = {
-        userId: lineUserId,
-        displayName: lineDisplayName,
-        funeralDate: funeralDate,
-        status: receiveReminder ? '配信希望' : '配信停止'
-      };
+     const payload = {
+  userId: lineUserId,
+  displayName: lineDisplayName,
+  deathDate: funeralDate,
+  status: receiveReminder ? '配信希望' : '配信停止'
+};
 
       try {
         const response = await fetch(GAS_URL, {
