@@ -2,176 +2,361 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>法要日チェック・リマインド登録</title>
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 
   <style>
+    :root {
+      --green: #17623d;
+      --green-dark: #0f4f31;
+      --green-soft: #eef7ed;
+      --cream: #fffdf7;
+      --border: #dfe6dc;
+      --text: #222;
+      --muted: #666;
+      --gold-soft: #fff3cc;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
     body {
       margin: 0;
-      font-family: "Hiragino Kaku Gothic ProN", "Yu Gothic", "Meiryo", sans-serif;
-      background: #f5f7f6;
-      color: #333;
-      font-size: 17px;
-      line-height: 1.8;
+      background: #f6f7f3;
+      font-family: "Yu Gothic", "Hiragino Kaku Gothic ProN", "Meiryo", sans-serif;
+      color: var(--text);
+      font-size: 18px;
+      line-height: 1.75;
     }
 
-    .container {
+    .app {
       max-width: 520px;
       margin: 0 auto;
-      padding: 20px;
+      background: var(--cream);
+      min-height: 100vh;
+      box-shadow: 0 0 20px rgba(0,0,0,0.08);
     }
 
-    .card {
-      background: #fff;
-      border-radius: 16px;
-      padding: 24px 20px;
-      box-shadow: 0 4px 14px rgba(0,0,0,0.08);
-    }
-
-    .label {
-      display: inline-block;
-      background: #0b6b50;
+    .topbar {
+      background: linear-gradient(135deg, var(--green-dark), var(--green));
       color: #fff;
-      padding: 4px 12px;
+      text-align: center;
+      font-weight: bold;
+      font-size: 20px;
+      padding: 16px 12px;
+    }
+
+    .hero {
+      position: relative;
+      padding: 28px 24px 18px;
+      overflow: hidden;
+      background: linear-gradient(180deg, #fffdf7 0%, #f5f9f1 100%);
+    }
+
+    .tagline {
+      display: inline-block;
+      background: #f3f8ea;
+      border: 1px solid #d9e6cf;
+      color: var(--green);
       border-radius: 999px;
-      font-size: 14px;
-      margin-bottom: 12px;
+      padding: 6px 18px;
+      font-size: 17px;
+      font-weight: bold;
+      margin-bottom: 18px;
     }
 
     h1 {
-      font-size: 24px;
-      color: #143f67;
-      line-height: 1.5;
-      margin: 0 0 12px;
+      margin: 0 0 16px;
+      color: var(--green);
+      font-size: clamp(34px, 8vw, 44px);
+      line-height: 1.25;
+      letter-spacing: 0.02em;
+      font-weight: 800;
     }
 
     .lead {
-      font-size: 16px;
-      color: #555;
-      margin-bottom: 22px;
+      max-width: 62%;
+      font-size: 18px;
+      line-height: 1.85;
+      margin: 0;
+      font-weight: 600;
     }
 
-    label {
-      display: block;
+    .dog {
+      position: absolute;
+      right: 20px;
+      top: 150px;
+      width: 33%;
+      max-width: 160px;
+      min-width: 115px;
+    }
+
+    .flower {
+      position: absolute;
+      right: 18px;
+      top: 360px;
+      font-size: 46px;
+      opacity: 0.85;
+    }
+
+    .card {
+      margin: 0 18px 28px;
+      background: #fff;
+      border-radius: 22px;
+      padding: 22px 18px 26px;
+      box-shadow: 0 5px 18px rgba(0,0,0,0.08);
+    }
+
+    #message {
+      background: linear-gradient(90deg, var(--green-soft), #fafbf2);
+      color: var(--green);
+      border-radius: 14px;
+      padding: 12px 14px;
       font-weight: bold;
-      margin-top: 18px;
-      margin-bottom: 6px;
-      color: #333;
+      margin: 0 0 22px;
+      font-size: 18px;
+    }
+
+    label.title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--green);
+      font-size: 19px;
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+
+    .required {
+      display: inline-block;
+      background: #2f8a4f;
+      color: #fff;
+      border-radius: 999px;
+      padding: 2px 8px;
+      font-size: 13px;
     }
 
     input[type="date"] {
       width: 100%;
-      padding: 14px;
+      font-size: 22px;
+      padding: 16px;
+      border: 1px solid #cfd6cc;
+      border-radius: 12px;
+      background: #fff;
+      margin-bottom: 18px;
+    }
+
+    .check-box {
+      background: var(--green-soft);
+      border-radius: 12px;
+      padding: 14px 12px;
       font-size: 18px;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      box-sizing: border-box;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 22px;
+    }
+
+    .check-box input {
+      width: 24px;
+      height: 24px;
+      accent-color: var(--green);
+    }
+
+    .schedule {
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      margin-bottom: 18px;
       background: #fff;
     }
 
-    .check {
-      margin-top: 18px;
+    .schedule-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #f6f9ee;
       padding: 14px;
-      background: #f1f6f4;
-      border-radius: 10px;
+      color: var(--green);
+      font-size: 20px;
+      font-weight: bold;
     }
 
-    .check input {
-      transform: scale(1.2);
-      margin-right: 8px;
+    .auto {
+      font-size: 13px;
+      border: 1px solid #d6e4c5;
+      border-radius: 999px;
+      padding: 4px 10px;
+      color: #527330;
+      background: #fbfff4;
+    }
+
+    .row {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 12px 14px;
+      border-top: 1px solid #eee;
+      font-size: 18px;
+      font-weight: bold;
+    }
+
+    .row span:last-child {
+      color: #446b24;
+      white-space: nowrap;
+    }
+
+    .note {
+      font-size: 15px;
+      color: var(--muted);
+      line-height: 1.7;
+      margin: 12px 0 20px;
     }
 
     button {
       width: 100%;
-      margin-top: 24px;
-      padding: 16px;
-      font-size: 18px;
-      font-weight: bold;
-      color: #fff;
-      background: #0b6b50;
       border: none;
-      border-radius: 10px;
+      border-radius: 18px;
+      background: linear-gradient(135deg, var(--green), var(--green-dark));
+      color: #fff;
+      font-size: 23px;
+      font-weight: bold;
+      padding: 18px;
+      margin-top: 8px;
+      box-shadow: 0 5px 12px rgba(0,0,0,0.18);
     }
 
     button:disabled {
       background: #aaa;
+      box-shadow: none;
     }
 
-    #message {
-      margin-top: 16px;
-      font-weight: bold;
-      color: #143f67;
+    .info {
+      margin-top: 20px;
+      background: #fffdf2;
+      border: 1px solid #ece5c9;
+      border-radius: 14px;
+      padding: 14px;
+      font-size: 15px;
+      line-height: 1.7;
     }
 
-    .schedule {
-      margin-top: 22px;
-      border-top: 1px solid #ddd;
-      padding-top: 16px;
-    }
-
-    .schedule h2 {
-      font-size: 19px;
-      color: #143f67;
-      margin-bottom: 10px;
-    }
-
-    .schedule-item {
-      display: flex;
-      justify-content: space-between;
-      padding: 10px 0;
-      border-bottom: 1px solid #eee;
-      font-size: 16px;
-    }
-
-    .note {
+    .warning {
+      margin-top: 14px;
+      background: var(--gold-soft);
+      border-radius: 12px;
+      padding: 12px;
       font-size: 14px;
-      color: #666;
-      margin-top: 16px;
+      color: #5d4b20;
+    }
+
+    @media (max-width: 430px) {
+      body {
+        font-size: 17px;
+      }
+
+      .hero {
+        padding: 24px 18px 14px;
+      }
+
+      .lead {
+        max-width: 64%;
+        font-size: 17px;
+      }
+
+      .dog {
+        right: 12px;
+        top: 145px;
+        width: 34%;
+      }
+
+      .card {
+        margin: 0 12px 22px;
+        padding: 20px 14px 24px;
+      }
+
+      h1 {
+        font-size: 36px;
+      }
+
+      button {
+        font-size: 21px;
+      }
     }
   </style>
 </head>
 
 <body>
-  <div class="container">
-    <div class="card">
-      <span class="label">法要日チェック</span>
+  <main class="app">
+    <div class="topbar">法要日チェック・リマインド登録</div>
 
-      <h1>法要日を確認し、<br>事前にLINEでお知らせします</h1>
+    <section class="hero">
+      <div class="tagline">大切な節目を、忘れずに。</div>
+
+      <h1>法要日を確認し、<br>LINEでお知らせします</h1>
 
       <p class="lead">
-        告別式日を入力すると、四十九日から十三回忌までの目安日を確認できます。
+        告別式日を入力すると、四十九日から十三回忌までの目安日を確認できます。<br>
         ご希望の方には、法要日の約1か月前を目安にLINEでお知らせします。
       </p>
 
+      <svg class="dog" viewBox="0 0 300 360" aria-hidden="true">
+        <path d="M86 88 C65 42 110 31 160 58 C179 45 223 54 232 87 C221 120 196 137 181 126 C166 115 174 91 174 91" fill="#fff" stroke="#231815" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M91 92 C88 132 73 169 83 198 C59 183 44 168 33 169 C12 176 16 220 73 244 C68 287 74 313 94 328 C113 337 120 293 123 286 C128 271 153 272 157 292 C161 310 153 344 177 345 C207 346 211 321 205 289 C231 272 232 234 218 204 C239 181 244 137 244 101" fill="#fff" stroke="#231815" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="119" cy="139" r="10" fill="#231815"/>
+        <circle cx="166" cy="139" r="10" fill="#231815"/>
+        <path d="M134 166 Q146 179 158 166" fill="none" stroke="#231815" stroke-width="12" stroke-linecap="round"/>
+        <path d="M130 159 Q145 151 160 159" fill="none" stroke="#231815" stroke-width="10" stroke-linecap="round"/>
+      </svg>
+    </section>
+
+    <section class="card">
       <p id="message">LINE情報を確認中です...</p>
 
-      <label for="funeralDate">告別式日</label>
+      <label class="title" for="funeralDate">
+        告別式日 <span class="required">必須</span>
+      </label>
       <input type="date" id="funeralDate" onchange="showSchedule()">
 
-      <div class="check">
-        <label>
-          <input type="checkbox" id="status" checked>
-          法要日リマインドを受け取る
-        </label>
-      </div>
+      <label class="check-box">
+        <input type="checkbox" id="status" checked>
+        法要日リマインドを受け取る
+      </label>
 
-      <div class="schedule" id="scheduleArea" style="display:none;">
-        <h2>法要日の目安</h2>
-        <div id="scheduleList"></div>
-        <p class="note">
-          ※地域やご事情により、実際の日程は前後する場合があります。目安としてご確認ください。
-        </p>
+      <div class="schedule">
+        <div class="schedule-head">
+          <span>📅 法要日の目安</span>
+          <span class="auto">自動で計算されます</span>
+        </div>
+        <div id="scheduleList">
+          <div class="row"><span>四十九日</span><span>----年--月--日</span></div>
+          <div class="row"><span>一周忌</span><span>----年--月--日</span></div>
+          <div class="row"><span>三回忌</span><span>----年--月--日</span></div>
+          <div class="row"><span>七回忌</span><span>----年--月--日</span></div>
+          <div class="row"><span>十三回忌</span><span>----年--月--日</span></div>
+        </div>
       </div>
-
-      <button id="submitButton" onclick="submitForm()" disabled>
-        LINE確認中...
-      </button>
 
       <p class="note">
-        登録後も、通知を希望しない場合はチェックを外して再登録することで停止扱いにできます。
+        ※地域やご事情により、実際の日程は前後する場合があります。目安としてご確認ください。
       </p>
-    </div>
-  </div>
+
+      <button id="submitButton" onclick="submitForm()" disabled>
+        この内容で登録する
+      </button>
+
+      <div class="info">
+        💡 登録後も、通知を希望しない場合はチェックを外して再登録することで停止扱いにできます。
+      </div>
+
+      <div class="warning">
+        ⚠ このサービスは予告なく終了する場合がございます。
+      </div>
+    </section>
+  </main>
 
   <script>
     const LIFF_ID = '2010185051-qe1y1hdl';
@@ -198,7 +383,7 @@
         lineUserId = profile.userId;
         lineDisplayName = profile.displayName || '';
 
-        message.innerText = 'LINE情報の確認ができました。';
+        message.innerText = '✅ 登録できます。';
         button.disabled = false;
         button.innerText = 'この内容で登録する';
 
@@ -244,14 +429,12 @@
 
       items.forEach(item => {
         list.innerHTML += `
-          <div class="schedule-item">
+          <div class="row">
             <span>${item[0]}</span>
-            <strong>${formatDate(item[1])}</strong>
+            <span>${formatDate(item[1])}</span>
           </div>
         `;
       });
-
-      document.getElementById('scheduleArea').style.display = 'block';
     }
 
     async function submitForm() {
